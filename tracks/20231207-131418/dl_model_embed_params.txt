@@ -1,0 +1,2 @@
+{'_batch_size': 2048, '_epochs': 24, '_optimizer': <keras.optimizers.optimizer_v2.rmsprop.RMSprop object at 0x000001EDEC9A7B50>, '_loss': <keras.losses.MeanAbsoluteError object at 0x000001EDA6792FB0>, '_metrics': <keras.metrics.metrics.MeanAbsolutePercentageError object at 0x000001EDA67912A0>}
+<tf.Variable 'learning_rate:0' shape=() dtype=float32, numpy=0.001>

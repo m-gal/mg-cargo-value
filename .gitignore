@@ -1,0 +1,10 @@
+**/__pycache__/
+**/.pytest_cache/
+**/.env
+
+**/_legacy
+**/analyze/
+**/temp/
+**/zips/
+
+**/tracks/20231207-131418/model

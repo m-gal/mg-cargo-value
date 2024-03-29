@@ -1,0 +1,15 @@
+## conda-forge:
+	cudatoolkit=11.2
+	cudnn=8.1.0
+## pip:
+	tensorflow<2.11
+## conda:
+	fastapi
+	fastparquet
+	ipykernel
+	pandas
+	scikit-learn
+	matplotlib
+	pydantic
+	pydot
+	uvicorn

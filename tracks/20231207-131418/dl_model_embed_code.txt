@@ -1,0 +1,95 @@
+def model_mlp(
+    inputs,
+    features_space,
+    optimizer,
+    loss,
+    metrics,
+    print_summary=True,
+):
+    ALPHA = 0.05
+    INITIALIZER = tf.keras.initializers.GlorotNormal(seed=42)
+    # https://keras.io/api/layers/initializers/#henormal-class
+
+    # You needs 'input' and 'encoded_features' as a lists
+    inputs_list = list(inputs.values())
+    encoded_features = list(features_space["encoded"].values())
+    flattened_features = list(features_space["flattened"].values())
+
+    # # Hot-fix for a TypeError: Tensors in list passed to 'values' of 'ConcatV2' Op
+    # # have types [float32, int64] that don't all match.
+    # flattened_features["description"] = tf.cast(
+    #     flattened_features["description"],
+    #     tf.float32,
+    # )
+
+    # * Combine different features into separated tensors
+    concat_flatted = tf.keras.layers.concatenate(
+        flattened_features, name="concat_flatted"
+    )
+    btchNorm_flatted = tf.keras.layers.BatchNormalization(name="btchNorm_flatted")(
+        concat_flatted
+    )
+    dense_flatted = tf.keras.layers.Dense(
+        units=512,
+        activation=tf.keras.layers.LeakyReLU(alpha=ALPHA),
+        name="dense_flatted",
+        kernel_initializer=INITIALIZER,
+    )(btchNorm_flatted)
+
+    concat_encoded = tf.keras.layers.concatenate(
+        encoded_features, name="concat_encoded"
+    )
+    btchNorm_encoded = tf.keras.layers.BatchNormalization(name="btchNorm_encoded")(
+        concat_encoded
+    )
+    dense_encoded = tf.keras.layers.Dense(
+        units=64,
+        activation=tf.keras.layers.LeakyReLU(alpha=ALPHA),
+        name="dense_encoded",
+        kernel_initializer=INITIALIZER,
+    )(btchNorm_encoded)
+
+    # * Combine input features into a single tensor
+    all = tf.keras.layers.concatenate([dense_encoded, dense_flatted], name="all")
+    batch_0 = tf.keras.layers.BatchNormalization(name="btchNorm_0")(all)
+    drop_0 = tf.keras.layers.Dropout(0.5, seed=RND_STATE, name="drop_0x50")(batch_0)
+
+    dense_1 = tf.keras.layers.Dense(
+        units=256,
+        activation=tf.keras.layers.LeakyReLU(alpha=ALPHA),
+        name="dense_1",
+        kernel_initializer=INITIALIZER,
+    )(drop_0)
+    batch_1 = tf.keras.layers.BatchNormalization(name="btchNorm_1")(dense_1)
+    drop_1 = tf.keras.layers.Dropout(0.5, seed=RND_STATE, name="drop_1x50")(batch_1)
+
+    dense_2 = tf.keras.layers.Dense(
+        units=128,
+        activation=tf.keras.layers.LeakyReLU(alpha=ALPHA),
+        name="dense_2",
+        kernel_initializer=INITIALIZER,
+    )(drop_1)
+    batch_2 = tf.keras.layers.BatchNormalization(name="btchNorm_2")(dense_2)
+
+    # * Output layer
+    out = tf.keras.layers.Dense(
+        units=1,
+        activation=tf.keras.layers.LeakyReLU(alpha=ALPHA),
+        name="prediction",
+        kernel_initializer=INITIALIZER,
+    )(batch_2)
+
+    outputs = [out]
+    model = tf.keras.Model(
+        inputs_list,
+        outputs,
+        name="model_embed",
+    )
+    model.compile(optimizer, loss, metrics)
+
+    if print_summary:
+        print(model.summary(line_length=150))
+
+    model.reset_states()
+    return model
+
